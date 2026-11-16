@@ -1,52 +1,124 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microservices Demo</title>
+    <title>Microservices Demo - Lab 01</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #f8fafc;
+            color: #1e293b;
         }
-
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #334155;
+        }
         button {
-            padding: 8px 15px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
-
-        input {
-            padding: 8px;
+        button:hover {
+            background-color: #1d4ed8;
         }
-
-        li {
-            margin: 8px 0;
+        input[type="number"] {
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 220px;
+            margin-right: 8px;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        ul#productList {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        ul#productList li {
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            font-size: 15px;
+        }
+        pre#result {
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            overflow-x: auto;
+            min-height: 50px;
+            margin-top: 15px;
+        }
+        .service-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 9999px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+            margin-left: 8px;
         }
     </style>
 </head>
 <body>
-    <h2>Danh sách sản phẩm</h2>
+    <div class="container">
+        <h1>Microservices Architecture Demo <span class="service-badge">Lab 01</span></h1>
 
-    <button onclick="loadProducts()">
-        Tải danh sách sản phẩm
-    </button>
+        <h2>Danh sách sản phẩm</h2>
+        <button onclick="loadProducts()">
+            Tải danh sách sản phẩm
+        </button>
+        <ul id="productList"></ul>
 
-    <ul id="productList"></ul>
-
-    <h2>Tìm sản phẩm thông qua Order Service</h2>
-
-    <input type="number" id="productId"
-           placeholder="Nhập ID sản phẩm" min="1">
-
-    <button onclick="findProduct()">
-        Tìm sản phẩm
-    </button>
-
-    <pre id="result"></pre>
+        <h2>Tìm sản phẩm thông qua Order Service</h2>
+        <input type="number" id="productId" placeholder="Nhập ID sản phẩm" min="1">
+        <button onclick="findProduct()">
+            Tìm sản phẩm
+        </button>
+        <pre id="result">// Kết quả tìm kiếm sẽ hiển thị tại đây...</pre>
+    </div>
 
     <script>
-        // Gọi trực tiếp Product Service
+        // Gọi trực tiếp Product Service (Port 8081)
         async function loadProducts() {
             try {
                 const response = await fetch(
@@ -54,31 +126,34 @@
                 );
 
                 if (!response.ok) {
-                    throw new Error("Không thể tải sản phẩm");
+                    throw new Error("Không thể tải danh sách sản phẩm");
                 }
 
                 const products = await response.json();
                 const list = document.getElementById("productList");
-
                 list.innerHTML = "";
+
+                if (products.length === 0) {
+                    list.textContent = "Chưa có sản phẩm";
+                    return;
+                }
 
                 products.forEach(product => {
                     const li = document.createElement("li");
-                    li.textContent =
-                        `${product.id} - ${product.name}`;
+                    li.textContent = `${product.id} - ${product.name}`;
                     list.appendChild(li);
                 });
             } catch (error) {
-                alert(error.message);
+                document.getElementById("productList").textContent = "Lỗi: " + error.message;
             }
         }
 
-        // Gọi Product Service thông qua Order Service
+        // Gọi Product Service thông qua Order Service (Port 8082 -> 8081)
         async function findProduct() {
             const id = document.getElementById("productId").value;
             const result = document.getElementById("result");
 
-            if (!id || Number(id) < 1) {
+            if (!id || !Number.isInteger(Number(id)) || Number(id) < 1) {
                 result.textContent = "Vui lòng nhập ID hợp lệ";
                 return;
             }
@@ -88,16 +163,19 @@
                     `http://localhost:8082/api/orders/product/${id}`
                 );
 
+                if (response.status === 404) {
+                    result.textContent = "Không tìm thấy sản phẩm";
+                    return;
+                }
+
                 if (!response.ok) {
-                    throw new Error("Không tìm thấy sản phẩm");
+                    throw new Error("Không thể lấy thông tin sản phẩm");
                 }
 
                 const product = await response.json();
-
-                result.textContent =
-                    JSON.stringify(product, null, 2);
+                result.textContent = JSON.stringify(product, null, 2);
             } catch (error) {
-                result.textContent = error.message;
+                result.textContent = "Lỗi: " + error.message;
             }
         }
     </script>
