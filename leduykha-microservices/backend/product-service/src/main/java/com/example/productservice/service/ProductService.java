@@ -12,7 +12,6 @@ import com.example.productservice.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -27,13 +26,41 @@ public class ProductService {
         this.brandRepository = brandRepository;
     }
 
-    public List<Product> getAll() {
-        return repository.findAll();
+    // Phương thức chuyển đổi Entity sang DTO (Lab 03 - Mục 7)
+    private ProductResponse toResponse(Product product) {
+        String catName = product.getCategory() != null ? product.getCategory().getName() : "Trà sữa";
+        String icon = product.getCategory() != null && product.getCategory().getIcon() != null ? product.getCategory().getIcon() : "🧋";
+        return new ProductResponse(
+            product.getId(),
+            product.getName(),
+            product.getPrice(),
+            catName,
+            icon,
+            product.getQuantity(),
+            product.getDescription(),
+            product.getSize(),
+            product.getRating(),
+            product.getIsAvailable()
+        );
     }
 
-    public Product getById(Long id) {
-        return repository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
+    // Lấy danh sách sản phẩm (Lab 03 - Mục 7)
+    public List<ProductResponse> getAll() {
+        return repository.findAll()
+            .stream()
+            .map(this::toResponse)
+            .toList();
+    }
+
+    // Lấy chi tiết sản phẩm theo ID (Lab 03 - Mục 7)
+    public ProductResponse getById(Long id) {
+        Product product = repository.findById(id)
+            .orElseThrow(() ->
+                new ResourceNotFoundException(
+                    "Không tìm thấy sản phẩm: " + id
+                )
+            );
+        return toResponse(product);
     }
 
     public Product create(Product product) {
@@ -73,7 +100,8 @@ public class ProductService {
     }
 
     public Product reduceStock(Long id, Integer quantity) {
-        Product product = getById(id);
+        Product product = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + id));
         if (product.getQuantity() < quantity) {
             throw new IllegalArgumentException("Món '" + product.getName() + "' không đủ số lượng tồn kho (còn: " + product.getQuantity() + ", yêu cầu: " + quantity + ")");
         }
@@ -85,7 +113,8 @@ public class ProductService {
     }
 
     public Product update(Long id, Product details) {
-        Product product = getById(id);
+        Product product = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + id));
         if (details.getName() != null && !details.getName().trim().isEmpty()) {
             product.setName(details.getName().trim());
         }
@@ -117,7 +146,8 @@ public class ProductService {
     }
 
     public void delete(Long id) {
-        Product product = getById(id);
+        Product product = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + id));
         repository.delete(product);
     }
 
@@ -130,27 +160,5 @@ public class ProductService {
 
     public List<Product> getByCategoryId(Long categoryId) {
         return repository.findByCategoryId(categoryId);
-    }
-
-    public ProductResponse toResponseDto(Product product) {
-        return new ProductResponse(
-            product.getId(),
-            product.getName(),
-            product.getPrice(),
-            product.getQuantity(),
-            product.getDescription(),
-            product.getSize(),
-            product.getRating(),
-            product.getIsAvailable(),
-            product.getCategory() != null ? product.getCategory().getId() : null,
-            product.getCategory() != null ? product.getCategory().getName() : null,
-            product.getCategory() != null ? product.getCategory().getIcon() : "🧋"
-        );
-    }
-
-    public List<ProductResponse> getAllResponses() {
-        return repository.findAll().stream()
-            .map(this::toResponseDto)
-            .collect(Collectors.toList());
     }
 }

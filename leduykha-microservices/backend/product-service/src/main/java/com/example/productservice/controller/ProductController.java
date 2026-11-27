@@ -22,33 +22,34 @@ public class ProductController {
         this.service = service;
     }
 
+    // Lấy danh sách sản phẩm (Lab 03 - Mục 7)
     @GetMapping
     public List<ProductResponse> getAll() {
-        return service.getAllResponses();
+        return service.getAll();
     }
 
+    // Lấy chi tiết sản phẩm theo ID (Lab 03 - Mục 7)
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
-        Product product = service.getById(id);
-        return ResponseEntity.ok(service.toResponseDto(product));
+    public ProductResponse getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
     @PostMapping
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         Product created = service.createFromDto(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.toResponseDto(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.getById(created.getId()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody Product product) {
         Product updated = service.update(id, product);
-        return ResponseEntity.ok(service.toResponseDto(updated));
+        return ResponseEntity.ok(service.getById(updated.getId()));
     }
 
     @PutMapping("/{id}/reduce-stock")
     public ResponseEntity<ProductResponse> reduceStock(@PathVariable Long id, @RequestParam Integer quantity) {
         Product updated = service.reduceStock(id, quantity);
-        return ResponseEntity.ok(service.toResponseDto(updated));
+        return ResponseEntity.ok(service.getById(updated.getId()));
     }
 
     @DeleteMapping("/{id}")
