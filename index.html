@@ -1,105 +1,653 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Microservices Demo</title>
+    <title>Hệ Thống Quản Lý Quán Trà Sữa - Microservices Demo</title>
     <style>
+        :root {
+            --primary: #9d5c34;
+            --primary-hover: #7b4421;
+            --primary-light: #fbf5f0;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #0284c7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 30px 20px;
+            line-height: 1.5;
         }
 
-        button {
-            padding: 8px 15px;
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #9d5c34 0%, #b87333 50%, #d4a373 100%);
+            color: white;
+            padding: 28px 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(157, 92, 52, 0.25);
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        header p {
+            margin-top: 8px;
+            opacity: 0.95;
+            font-size: 14.5px;
+        }
+
+        .meta-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 900px) {
+            .grid-2col {
+                grid-template-columns: 1.15fr 0.85fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1.5px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        input {
-            padding: 8px;
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
 
-        li {
-            margin: 8px 0;
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+        }
+
+        /* Menu Grid */
+        .drinks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 16px;
+            margin-top: 15px;
+        }
+
+        .drink-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .drink-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.08);
+            border-color: #d4a373;
+        }
+
+        .drink-icon {
+            font-size: 38px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .drink-cat {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #475569;
+            margin-bottom: 6px;
+            width: fit-content;
+        }
+
+        .drink-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .drink-desc {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .drink-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px dashed var(--border);
+            padding-top: 10px;
+            margin-top: 8px;
+        }
+
+        .drink-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: #b45309;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Orders list */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 15px;
+        }
+
+        .order-item {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-code {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .order-status {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .status-preparing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .order-body {
+            font-size: 13.5px;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .order-details-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 8px;
+            font-size: 13px;
+        }
+
+        /* Search input & json box */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex-grow: 1;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(157, 92, 52, 0.15);
+        }
+
+        pre.code-output {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 16px;
+            border-radius: 10px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 280px;
+            white-space: pre-wrap;
+        }
+
+        .service-tag {
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <h2>Danh sách sản phẩm</h2>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>🧋 HỆ THỐNG QUẢN LÝ QUÁN TRÀ SỮA</h1>
+            <p>Đề tài: <strong>Milk Tea Store Management System</strong> &bull; Kiến trúc Spring Boot Microservices</p>
+            <div class="meta-badges">
+                <span class="badge">👤 Sinh viên: Lê Duy Kha</span>
+                <span class="badge">🎓 MSSV: 2124110074</span>
+                <span class="badge">📦 Product Service (Port 8081)</span>
+                <span class="badge">⚡ Order Service (Port 8082)</span>
+            </div>
+        </header>
 
-    <button onclick="loadProducts()">
-        Tải danh sách sản phẩm
-    </button>
+        <!-- MAIN GRID -->
+        <div class="grid">
+            <!-- PHẦN 1: GỌI TRỰC TIẾP PRODUCT SERVICE -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">
+                            🍵 Thực Đơn Quán Trà Sữa (Menu Service)
+                            <span class="service-tag">Product Service : 8081</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 3px;">
+                            Gọi trực tiếp endpoint <code>GET http://localhost:8081/api/products</code>
+                        </p>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadProducts()">
+                        ↻ Tải Thực Đơn
+                    </button>
+                </div>
 
-    <ul id="productList"></ul>
+                <div id="drinksContainer" class="drinks-grid">
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        Nhấn nút <strong>"Tải Thực Đơn"</strong> để nạp danh sách đồ uống trà sữa từ Product Service.
+                    </div>
+                </div>
+            </div>
 
-    <h2>Tìm sản phẩm thông qua Order Service</h2>
+            <!-- PHẦN 2: TÌM ĐỒ UỐNG QUA ORDER SERVICE VÀ DANH SÁCH ĐƠN HÀNG -->
+            <div class="grid grid-2col">
+                <!-- TRA CỨU ĐỒ UỐNG QUA ORDER SERVICE -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">
+                                🔍 Tra Cứu Đồ Uống Qua Order Service
+                            </div>
+                            <span class="service-tag">Giao tiếp Service-to-Service: 8082 ➜ 8081</span>
+                        </div>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+                        Order Service sử dụng <code>RestClient</code> để gọi sang Product Service lấy dữ liệu:
+                        <br><code>GET http://localhost:8082/api/orders/product/{id}</code>
+                    </p>
 
-    <input type="number" id="productId"
-           placeholder="Nhập ID sản phẩm" min="1">
+                    <div class="search-box">
+                        <input type="number" id="productId" placeholder="Nhập ID món trà sữa (1 - 8)..." min="1" max="8" value="1">
+                        <button class="btn btn-secondary" onclick="findProductViaOrderService()">
+                            Tìm Kiếm
+                        </button>
+                    </div>
 
-    <button onclick="findProduct()">
-        Tìm sản phẩm
-    </button>
+                    <div id="productDetailCard" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px; margin-bottom: 12px;">
+                        <!-- Rendered by JS -->
+                    </div>
 
-    <pre id="result"></pre>
+                    <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">JSON Phản Hồi Từ Order Service:</div>
+                    <pre id="orderResult" class="code-output">// Nhấn "Tìm Kiếm" để xem kết quả trao đổi giữa 2 microservices...</pre>
+                </div>
+
+                <!-- DANH SÁCH ĐƠN HÀNG TRÀ SỮA -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">
+                                📋 Đơn Hàng Trà Sữa (Order Service)
+                            </div>
+                            <span class="service-tag">Order Service : 8082</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="loadOrders()">
+                            ↻ Tải Đơn Hàng
+                        </button>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+                        Gọi endpoint <code>GET http://localhost:8082/api/orders</code>
+                    </p>
+
+                    <div id="ordersContainer" class="orders-list">
+                        <div class="empty-state">
+                            Nhấn nút <strong>"Tải Đơn Hàng"</strong> để xem danh sách đơn trà sữa.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Gọi trực tiếp Product Service
-        async function loadProducts() {
-            try {
-                const response = await fetch(
-                    "http://localhost:8081/api/products"
-                );
+        const PRODUCT_API = "http://localhost:8081/api/products";
+        const ORDER_API = "http://localhost:8082/api/orders";
 
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // 1. Tải danh sách đồ uống từ Product Service (Port 8081)
+        async function loadProducts() {
+            const container = document.getElementById("drinksContainer");
+            container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">Đang tải danh sách đồ uống từ Product Service (8081)...</div>`;
+
+            try {
+                const response = await fetch(PRODUCT_API);
                 if (!response.ok) {
-                    throw new Error("Không thể tải sản phẩm");
+                    throw new Error("Không thể kết nối tới Product Service (Port 8081)");
                 }
 
                 const products = await response.json();
-                const list = document.getElementById("productList");
+                if (!products || products.length === 0) {
+                    container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">Chưa có đồ uống trong hệ thống.</div>`;
+                    return;
+                }
 
-                list.innerHTML = "";
-
-                products.forEach(product => {
-                    const li = document.createElement("li");
-                    li.textContent =
-                        `${product.id} - ${product.name}`;
-                    list.appendChild(li);
+                container.innerHTML = "";
+                products.forEach(p => {
+                    const card = document.createElement("div");
+                    card.className = "drink-card";
+                    card.innerHTML = `
+                        <div>
+                            <div class="drink-icon">${p.image || "🧋"}</div>
+                            <span class="drink-cat">${p.category || "Trà sữa"}</span>
+                            <div class="drink-name">#${p.id}. ${p.name}</div>
+                            <div class="drink-desc">${p.description || ""}</div>
+                        </div>
+                        <div class="drink-footer">
+                            <span class="drink-price">${formatVND(p.price)}</span>
+                            <button class="btn btn-outline btn-sm" onclick="selectDrink(${p.id})">
+                                Tra cứu ➜
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
                 });
-            } catch (error) {
-                alert(error.message);
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; color: #dc2626;">
+                        ⚠️ Lỗi: ${err.message}<br>
+                        <small>Vui lòng đảm bảo Product Service đang chạy tại <code>http://localhost:8081</code> (chạy <code>run-product-service.bat</code> hoặc <code>run-all.bat</code>).</small>
+                    </div>
+                `;
             }
         }
 
-        // Gọi Product Service thông qua Order Service
-        async function findProduct() {
-            const id = document.getElementById("productId").value;
-            const result = document.getElementById("result");
+        function selectDrink(id) {
+            document.getElementById("productId").value = id;
+            findProductViaOrderService();
+            document.getElementById("productId").scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
-            if (!id || Number(id) < 1) {
-                result.textContent = "Vui lòng nhập ID hợp lệ";
+        // 2. Tra cứu đồ uống qua Order Service (Port 8082 -> 8081)
+        async function findProductViaOrderService() {
+            const idInput = document.getElementById("productId").value;
+            const resultBox = document.getElementById("orderResult");
+            const detailCard = document.getElementById("productDetailCard");
+
+            if (!idInput || Number(idInput) < 1) {
+                resultBox.textContent = "Vui lòng nhập ID hợp lệ (từ 1 trở lên).";
+                detailCard.style.display = "none";
                 return;
             }
 
-            try {
-                const response = await fetch(
-                    `http://localhost:8082/api/orders/product/${id}`
-                );
+            resultBox.textContent = `Đang gọi http://localhost:8082/api/orders/product/${idInput} ...`;
 
+            try {
+                const response = await fetch(`${ORDER_API}/product/${idInput}`);
+                if (response.status === 404) {
+                    resultBox.textContent = `Không tìm thấy món trà sữa có ID = ${idInput}`;
+                    detailCard.style.display = "none";
+                    return;
+                }
                 if (!response.ok) {
-                    throw new Error("Không tìm thấy sản phẩm");
+                    throw new Error(`Lỗi kết nối Order Service (Status ${response.status})`);
                 }
 
-                const product = await response.json();
+                const data = await response.json();
+                resultBox.textContent = JSON.stringify(data, null, 2);
 
-                result.textContent =
-                    JSON.stringify(product, null, 2);
-            } catch (error) {
-                result.textContent = error.message;
+                // Render detail card
+                detailCard.style.display = "block";
+                detailCard.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <span style="font-size: 28px;">${data.image || "🧋"}</span>
+                        <div>
+                            <strong style="font-size: 15px; color: #92400e;">#${data.id} - ${data.name}</strong>
+                            <div style="font-size: 12px; color: #b45309;">Danh mục: <strong>${data.category}</strong> | Giá: <strong>${formatVND(data.price)}</strong> (Size ${data.size || "M"})</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 12.5px; color: #78350f; margin-top: 4px;">${data.description || ""}</p>
+                `;
+            } catch (err) {
+                resultBox.textContent = `⚠️ Lỗi: ${err.message}\nĐảm bảo Order Service đang chạy tại port 8082.`;
+                detailCard.style.display = "none";
             }
         }
+
+        // 3. Tải danh sách đơn hàng từ Order Service (Port 8082)
+        async function loadOrders() {
+            const container = document.getElementById("ordersContainer");
+            container.innerHTML = `<div class="empty-state">Đang tải danh sách đơn hàng từ Order Service (8082)...</div>`;
+
+            try {
+                const response = await fetch(ORDER_API);
+                if (!response.ok) {
+                    throw new Error("Không thể kết nối tới Order Service (Port 8082)");
+                }
+
+                const orders = await response.json();
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `<div class="empty-state">Chưa có đơn hàng nào.</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                orders.forEach(o => {
+                    const item = document.createElement("div");
+                    item.className = "order-item";
+
+                    let statusClass = "status-pending";
+                    if (o.status && o.status.includes("Preparing")) statusClass = "status-preparing";
+                    if (o.status && o.status.includes("Completed")) statusClass = "status-completed";
+
+                    const toppingsHtml = (o.toppings || []).map(t => `<span class="tag">+ ${t}</span>`).join(" ");
+
+                    item.innerHTML = `
+                        <div class="order-header">
+                            <span class="order-code">#${o.id} &bull; ${o.orderCode || "ORDER"}</span>
+                            <span class="order-status ${statusClass}">${o.status || "Mới"}</span>
+                        </div>
+                        <div class="order-body">
+                            <div><strong>Khách hàng:</strong> ${o.customerName} (${o.orderType})</div>
+                            <div style="margin-top: 4px;">
+                                <strong>Món:</strong> ${o.quantity}x ${o.productName} (Size ${o.size})
+                            </div>
+                            <div class="order-details-tags">
+                                <span class="tag">Đường: ${o.sugar}</span>
+                                <span class="tag">Đá: ${o.ice}</span>
+                                ${toppingsHtml}
+                            </div>
+                            ${o.note ? `<div style="font-size: 12px; color: #dc2626; margin-top: 4px;">📝 Ghi chú: ${o.note}</div>` : ""}
+                        </div>
+                        <div class="order-footer">
+                            <span style="color: var(--text-muted);">Đơn giá: ${formatVND(o.unitPrice)}</span>
+                            <strong style="color: #b45309; font-size: 14px;">Tổng: ${formatVND(o.totalPrice)}</strong>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="empty-state" style="color: #dc2626;">
+                        ⚠️ Lỗi: ${err.message}<br>
+                        <small>Vui lòng đảm bảo Order Service đang chạy tại <code>http://localhost:8082</code>.</small>
+                    </div>
+                `;
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            loadProducts();
+            loadOrders();
+        });
     </script>
 </body>
 </html>
