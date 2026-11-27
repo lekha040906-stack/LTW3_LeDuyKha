@@ -41,6 +41,11 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Cart> update(@PathVariable Long id, @Valid @RequestBody Cart cart) {
+        return ResponseEntity.ok(service.update(id, cart));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

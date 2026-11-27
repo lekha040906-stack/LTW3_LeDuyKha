@@ -37,6 +37,11 @@ public class OrderController {
         return ResponseEntity.ok(service.getById(id));
     }
 
+    @GetMapping("/code/{orderCode}")
+    public ResponseEntity<Order> getByOrderCode(@PathVariable String orderCode) {
+        return ResponseEntity.ok(service.getByOrderCode(orderCode));
+    }
+
     @PostMapping
     public ResponseEntity<Order> create(@Valid @RequestBody Order order) {
         Order created = service.create(order);
@@ -45,6 +50,13 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Order> update(@PathVariable Long id, @Valid @RequestBody Order order) {
+        return ResponseEntity.ok(service.update(id, order));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        Order order = service.getById(id);
+        order.setStatus(status);
         return ResponseEntity.ok(service.update(id, order));
     }
 
