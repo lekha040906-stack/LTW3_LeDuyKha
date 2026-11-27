@@ -1,7 +1,9 @@
 package com.example.productservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,17 +15,21 @@ public class Category {
     private Long id;
 
     @NotBlank(message = "Tên loại sản phẩm không được để trống")
-    @Column(nullable = false, length = 100)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "description", length = 255)
     private String description;
 
+    @Column(name = "icon", length = 50)
     private String icon;
 
+    @Column(name = "active")
     private Boolean active = true;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Product> products;
+    private List<Product> products = new ArrayList<>();
 
     public Category() {}
 
@@ -31,6 +37,7 @@ public class Category {
         this.name = name;
         this.description = description;
         this.icon = icon;
+        this.active = true;
     }
 
     public Long getId() { return id; }
@@ -47,4 +54,7 @@ public class Category {
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
+
+    public List<Product> getProducts() { return products; }
+    public void setProducts(List<Product> products) { this.products = products; }
 }

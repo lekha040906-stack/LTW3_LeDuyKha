@@ -2,7 +2,9 @@ package com.example.orderservice.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,29 +16,48 @@ public class Order {
     private Long id;
 
     @NotBlank(message = "Mã đơn hàng không được để trống")
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "order_code", nullable = false, unique = true, length = 50)
     private String orderCode;
 
+    @Column(name = "customer_name", length = 100)
     private String customerName;
 
+    @Column(name = "phone", length = 20)
     private String phone;
 
+    @Column(name = "order_type", length = 50)
     private String orderType = "Takeaway";
 
-    private Double totalAmount = 0.0;
+    @Column(name = "total_amount", precision = 14, scale = 2)
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
+    @Column(name = "payment_method", length = 50)
     private String paymentMethod = "Cash";
 
+    @Column(name = "status", length = 50)
     private String status = "Pending";
 
+    @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 
     public Order() {}
+
+    public Order(String orderCode, String customerName, String phone, String orderType, BigDecimal totalAmount, String status, String note) {
+        this.orderCode = orderCode;
+        this.customerName = customerName;
+        this.phone = phone;
+        this.orderType = orderType;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.note = note;
+        this.createdAt = LocalDateTime.now();
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -53,8 +74,8 @@ public class Order {
     public String getOrderType() { return orderType; }
     public void setOrderType(String orderType) { this.orderType = orderType; }
 
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+    public BigDecimal getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
