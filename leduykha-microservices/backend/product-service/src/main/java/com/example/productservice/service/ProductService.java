@@ -1,18 +1,29 @@
 package com.example.productservice.service;
 
+import com.example.productservice.dto.request.ProductCreateRequest;
+import com.example.productservice.dto.response.ProductResponse;
+import com.example.productservice.entity.Brand;
+import com.example.productservice.entity.Category;
 import com.example.productservice.entity.Product;
+import com.example.productservice.repository.BrandRepository;
+import com.example.productservice.repository.CategoryRepository;
 import com.example.productservice.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
     private final ProductRepository repository;
+    private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, CategoryRepository categoryRepository, BrandRepository brandRepository) {
         this.repository = repository;
+        this.categoryRepository = categoryRepository;
+        this.brandRepository = brandRepository;
     }
 
     public List<Product> getAll() {
@@ -30,6 +41,40 @@ public class ProductService {
         }
         if (product.getPrice() == null) {
             throw new IllegalArgumentException("Giá bán không được để trống");
+        }
+        return repository.save(product);
+    }
+
+    public Product createFromDto(ProductCreateRequest request) {
+        Category category = categoryRepository.findById(request.getCategoryId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + request.getCategoryId()));
+        Brand brand = null;
+        if (request.getBrandId() != null) {
+            brand = brandRepository.findById(request.getBrandId()).orElse(null);
+        }
+
+        Product product = new Product(
+            request.getName().trim(),
+            request.getPrice(),
+            request.getQuantity(),
+            request.getDescription(),
+            category,
+            brand
+        );
+        if (request.getSize() != null) {
+            product.setSize(request.getSize());
+        }
+        return repository.save(product);
+    }
+
+    public Product reduceStock(Long id, Integer quantity) {
+        Product product = getById(id);
+        if (product.getQuantity() < quantity) {
+            throw new IllegalArgumentException("Món '" + product.getName() + "' không đủ số lượng tồn kho (còn: " + product.getQuantity() + ", yêu cầu: " + quantity + ")");
+        }
+        product.setQuantity(product.getQuantity() - quantity);
+        if (product.getQuantity() == 0) {
+            product.setIsAvailable(false);
         }
         return repository.save(product);
     }
@@ -80,5 +125,33 @@ public class ProductService {
 
     public List<Product> getByCategoryId(Long categoryId) {
         return repository.findByCategoryId(categoryId);
+    }
+
+    public ProductResponse toResponseDto(Product product) {
+        ProductResponse dto = new ProductResponse();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setQuantity(product.getQuantity());
+        dto.setDescription(product.getDescription());
+        dto.setSize(product.getSize());
+        dto.setRating(product.getRating());
+        dto.setIsAvailable(product.getIsAvailable());
+        if (product.getCategory() != null) {
+            dto.setCategoryId(product.getCategory().getId());
+            dto.setCategoryName(product.getCategory().getName());
+            dto.setIcon(product.getCategory().getIcon());
+        }
+        if (product.getBrand() != null) {
+            dto.setBrandId(product.getBrand().getId());
+            dto.setBrandName(product.getBrand().getName());
+        }
+        return dto;
+    }
+
+    public List<ProductResponse> getAllResponses() {
+        return repository.findAll().stream()
+            .map(this::toResponseDto)
+            .collect(Collectors.toList());
     }
 }

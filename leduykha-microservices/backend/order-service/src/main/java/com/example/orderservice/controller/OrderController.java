@@ -1,5 +1,8 @@
 package com.example.orderservice.controller;
 
+import com.example.orderservice.dto.request.CreateOrderRequest;
+import com.example.orderservice.dto.response.ApiResponse;
+import com.example.orderservice.dto.response.OrderResponse;
 import com.example.orderservice.entity.Order;
 import com.example.orderservice.service.OrderService;
 import jakarta.validation.Valid;
@@ -28,18 +31,29 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<Order> getAll() {
-        return service.getAll();
+    public List<OrderResponse> getAll() {
+        return service.getAllResponses();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getById(id));
+    public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.toResponseDto(service.getById(id)));
     }
 
     @GetMapping("/code/{orderCode}")
-    public ResponseEntity<Order> getByOrderCode(@PathVariable String orderCode) {
-        return ResponseEntity.ok(service.getByOrderCode(orderCode));
+    public ResponseEntity<OrderResponse> getByOrderCode(@PathVariable String orderCode) {
+        return ResponseEntity.ok(service.toResponseDto(service.getByOrderCode(orderCode)));
+    }
+
+    /**
+     * API Nghiệp vụ gọi món liên service (Lab 03) với Request DTO và Response DTO chuẩn hóa
+     */
+    @PostMapping("/place-order")
+    public ResponseEntity<ApiResponse<OrderResponse>> placeOrder(@Valid @RequestBody CreateOrderRequest request) {
+        OrderResponse response = service.placeOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ApiResponse.ok("Khách hàng đã gọi món thành công! Đơn hàng đã được tạo.", response)
+        );
     }
 
     @PostMapping
