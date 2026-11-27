@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quán Trà Sữa Online - Đặt Hàng Trực Tuyến</title>
+    <style>
+        :root {
+            --primary: #9d5c34;
+            --primary-hover: #7b4421;
+            --primary-light: #fbf5f0;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding-bottom: 60px;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-pill {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        /* HERO BANNER */
+        .hero {
+            background: linear-gradient(135deg, #9d5c34 0%, #b87333 50%, #d4a373 100%);
+            color: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero h1 {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .hero p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* CATEGORIES */
+        .categories {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cat-btn {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        /* PRODUCTS GRID */
+        .drinks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .drink-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .drink-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.08);
+            border-color: #d4a373;
+        }
+
+        .drink-icon {
+            font-size: 44px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .drink-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .drink-cat {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #475569;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .drink-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .drink-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #b45309;
+        }
+
+        .btn-order {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-order:hover {
+            background: var(--primary-hover);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .close-btn {
+            font-size: 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .option-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .option-btn.selected {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="brand">
+            🧋 MILK TEA STORE
+        </div>
+        <div class="cart-pill" onclick="openCart()">
+            🛒 Giỏ hàng (<span id="cartCount">0</span>) &bull; <span id="cartTotal">0 đ</span>
+        </div>
+    </div>
+
+    <!-- CONTAINER -->
+    <div class="container">
+        <!-- HERO -->
+        <div class="hero">
+            <div>
+                <h1>Chào Mừng Bạn Đến Quán Trà Sữa!</h1>
+                <p>Thưởng thức trà sữa chuẩn vị, chọn tùy ý mức đường, mức đá và các loại Topping hấp dẫn.</p>
+                <div style="font-size: 12.5px; opacity: 0.9; margin-top: 8px;">
+                    👤 Sinh viên: <strong>Lê Duy Kha (MSSV: 2124110074)</strong> &bull; Microservices Demo
+                </div>
+            </div>
+            <div style="font-size: 50px;">🧋</div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div class="categories">
+            <button class="cat-btn active" onclick="filterCat('all')">Tất Cả</button>
+            <button class="cat-btn" onclick="filterCat('Trà sữa')">Trà Sữa Đậm Vị</button>
+            <button class="cat-btn" onclick="filterCat('Trà trái cây')">Trà Trái Cây</button>
+            <button class="cat-btn" onclick="filterCat('Macchiato')">Macchiato & Cheese</button>
+            <button class="cat-btn" onclick="filterCat('Sữa tươi')">Sữa Tươi</button>
+            <button class="cat-btn" onclick="filterCat('Cà phê')">Cà Phê</button>
+        </div>
+
+        <!-- DRINKS GRID -->
+        <div id="drinksGrid" class="drinks-grid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">Đang tải danh mục từ Product Service (8081)...</div>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOMIZE DRINK -->
+    <div id="customizeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalDrinkName" style="font-size: 18px;">Tên đồ uống</h3>
+                    <div id="modalBasePrice" style="color: #b45309; font-weight: 700; font-size: 15px;">35.000 đ</div>
+                </div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <!-- CHỌN SIZE -->
+            <div class="form-group">
+                <label>1. Chọn Kích Cỡ Ly (Size):</label>
+                <div class="btn-group">
+                    <button class="option-btn selected" onclick="selectOption('size', 'M', 0, this)">Size M (Chuẩn)</button>
+                    <button class="option-btn" onclick="selectOption('size', 'L', 6000, this)">Size L (+6.000đ)</button>
+                </div>
+            </div>
+
+            <!-- CHỌN ĐƯỜNG -->
+            <div class="form-group">
+                <label>2. Mức Đường (% Sweetness):</label>
+                <div class="btn-group">
+                    <button class="option-btn" onclick="selectOption('sugar', '0%', 0, this)">0%</button>
+                    <button class="option-btn" onclick="selectOption('sugar', '30%', 0, this)">30%</button>
+                    <button class="option-btn selected" onclick="selectOption('sugar', '50%', 0, this)">50% (Khuyên dùng)</button>
+                    <button class="option-btn" onclick="selectOption('sugar', '70%', 0, this)">70%</button>
+                    <button class="option-btn" onclick="selectOption('sugar', '100%', 0, this)">100%</button>
+                </div>
+            </div>
+
+            <!-- CHỌN ĐÁ -->
+            <div class="form-group">
+                <label>3. Mức Đá (% Ice):</label>
+                <div class="btn-group">
+                    <button class="option-btn" onclick="selectOption('ice', 'Không đá', 0, this)">Không đá</button>
+                    <button class="option-btn selected" onclick="selectOption('ice', '50% đá', 0, this)">50% đá</button>
+                    <button class="option-btn" onclick="selectOption('ice', '100% đá', 0, this)">100% đá</button>
+                </div>
+            </div>
+
+            <!-- CHỌN TOPPING -->
+            <div class="form-group checkbox-group">
+                <label>4. Thêm Topping Yêu Thích:</label>
+                <label><input type="checkbox" value="Trân châu đen đường đen" data-price="6000" onchange="calcModalPrice()"> Trân châu đen đường đen (+6.000đ)</label>
+                <label><input type="checkbox" value="Trân châu trắng 3Q" data-price="6000" onchange="calcModalPrice()"> Trân châu trắng 3Q giòn (+6.000đ)</label>
+                <label><input type="checkbox" value="Thạch phô mai tươi" data-price="9000" onchange="calcModalPrice()"> Thạch phô mai tươi viên (+9.000đ)</label>
+                <label><input type="checkbox" value="Pudding trứng caramen" data-price="7000" onchange="calcModalPrice()"> Pudding trứng caramen (+7.000đ)</label>
+            </div>
+
+            <!-- GHI CHÚ -->
+            <div class="form-group">
+                <label>Ghi chú riêng cho quầy Bar:</label>
+                <input type="text" id="drinkNote" placeholder="Ví dụ: ít ngọt, trà đậm, mang đi..." style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 16px;">
+                <div>
+                    <span style="font-size: 13px; color: var(--text-muted);">Thành tiền ly này:</span>
+                    <div id="modalTotalPrice" style="font-size: 18px; font-weight: 700; color: #b45309;">35.000 đ</div>
+                </div>
+                <button class="btn-order" onclick="addToCart()" style="padding: 10px 20px; font-size: 14px;">
+                    Thêm Vào Giỏ 🛒
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART / CHECKOUT MODAL -->
+    <div id="cartModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 style="font-size: 18px;">🛒 Giỏ Hàng & Đặt Hàng</h3>
+                <button class="close-btn" onclick="closeCart()">✕</button>
+            </div>
+
+            <div id="cartItemsList" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px;">
+                <!-- Rendered by JS -->
+            </div>
+
+            <!-- CHECKOUT FORM -->
+            <div class="form-group">
+                <label>Hình thức nhận đồ uống:</label>
+                <div class="btn-group">
+                    <button class="option-btn selected" onclick="selectOrderType('take_away', this)">Mang đi (Takeaway)</button>
+                    <button class="option-btn" onclick="selectOrderType('dine_in', this)">Tại bàn (Dine-in)</button>
+                    <button class="option-btn" onclick="selectOrderType('delivery', this)">Giao tận nơi (Delivery)</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Số điện thoại khách hàng (để tích điểm hội viên):</label>
+                <input type="text" id="customerPhone" placeholder="Nhập SĐT (vd: 0901234567)" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
+            </div>
+
+            <div class="form-group">
+                <label>Phương thức thanh toán:</label>
+                <div class="btn-group">
+                    <button class="option-btn selected" onclick="selectPayMethod('vietqr', this)">Quét mã VietQR</button>
+                    <button class="option-btn" onclick="selectPayMethod('cash', this)">Tiền mặt</button>
+                    <button class="option-btn" onclick="selectPayMethod('momo', this)">Ví MoMo</button>
+                </div>
+            </div>
+
+            <div id="qrBox" style="display: none; text-align: center; background: #fffbeb; padding: 12px; border-radius: 10px; margin-bottom: 14px;">
+                <div style="font-size: 12px; font-weight: 700; color: #92400e; margin-bottom: 6px;">MÃ VIETQR THANH TOÁN TỰ ĐỘNG</div>
+                <img id="vietQrImg" src="" style="width: 160px; height: 160px; border-radius: 8px;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 14px;">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted);">Tổng thanh toán:</span>
+                    <div id="cartFinalTotal" style="font-size: 20px; font-weight: 700; color: #b45309;">0 đ</div>
+                </div>
+                <button class="btn-order" onclick="submitOrder()" style="padding: 10px 20px; font-size: 14px;">
+                    Xác Nhận Đặt Hàng 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allProducts = [];
+        let currentDrink = null;
+        let selectedSize = 'M';
+        let sizeExtra = 0;
+        let selectedSugar = '50%';
+        let selectedIce = '50% đá';
+        let cart = [];
+        let orderType = 'take_away';
+        let payMethod = 'vietqr';
+
+        function formatVND(amt) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amt);
+        }
+
+        async function loadProducts() {
+            try {
+                const res = await fetch('http://localhost:8081/api/products');
+                allProducts = await res.json();
+                renderDrinks(allProducts);
+            } catch (e) {
+                document.getElementById('drinksGrid').innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; color: #dc2626; padding: 40px;">
+                        ⚠️ Chưa kết nối được Product Service (Port 8081). Vui lòng chạy <code>run-all.bat</code>!
+                    </div>
+                `;
+            }
+        }
+
+        function renderDrinks(drinks) {
+            const grid = document.getElementById('drinksGrid');
+            grid.innerHTML = drinks.map(d => `
+                <div class="drink-card">
+                    <div>
+                        <div class="drink-icon">${d.image || '🧋'}</div>
+                        <span class="drink-cat">${d.category}</span>
+                        <div class="drink-name">#${d.id}. ${d.name}</div>
+                        <div class="drink-desc">${d.description || ''}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 10px;">
+                        <span class="drink-price">${formatVND(d.price)}</span>
+                        <button class="btn-order" onclick="openModal(${d.id})">+ Chọn Món</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCat(cat) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (cat === 'all') {
+                renderDrinks(allProducts);
+            } else {
+                renderDrinks(allProducts.filter(p => p.category.includes(cat)));
+            }
+        }
+
+        function openModal(id) {
+            currentDrink = allProducts.find(p => p.id === id);
+            if (!currentDrink) return;
+
+            document.getElementById('modalDrinkName').textContent = currentDrink.name;
+            document.getElementById('modalBasePrice').textContent = formatVND(currentDrink.price);
+            document.getElementById('drinkNote').value = '';
+
+            selectedSize = 'M';
+            sizeExtra = 0;
+            selectedSugar = '50%';
+            selectedIce = '50% đá';
+
+            // Reset checkboxes
+            document.querySelectorAll('#customizeModal input[type="checkbox"]').forEach(c => c.checked = false);
+
+            calcModalPrice();
+            document.getElementById('customizeModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customizeModal').style.display = 'none';
+        }
+
+        function selectOption(type, val, extra, btn) {
+            btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            if (type === 'size') {
+                selectedSize = val;
+                sizeExtra = extra;
+            } else if (type === 'sugar') {
+                selectedSugar = val;
+            } else if (type === 'ice') {
+                selectedIce = val;
+            }
+            calcModalPrice();
+        }
+
+        function calcModalPrice() {
+            if (!currentDrink) return;
+            let total = currentDrink.price + sizeExtra;
+            document.querySelectorAll('#customizeModal input[type="checkbox"]:checked').forEach(c => {
+                total += Number(c.dataset.price || 0);
+            });
+            document.getElementById('modalTotalPrice').textContent = formatVND(total);
+            return total;
+        }
+
+        function addToCart() {
+            const toppings = [];
+            document.querySelectorAll('#customizeModal input[type="checkbox"]:checked').forEach(c => {
+                toppings.push(c.value);
+            });
+
+            const price = calcModalPrice();
+            cart.push({
+                product: currentDrink,
+                size: selectedSize,
+                sugar: selectedSugar,
+                ice: selectedIce,
+                toppings: toppings,
+                note: document.getElementById('drinkNote').value,
+                price: price
+            });
+
+            updateCartHeader();
+            closeModal();
+            alert(`Đã thêm "${currentDrink.name}" vào giỏ hàng!`);
+        }
+
+        function updateCartHeader() {
+            document.getElementById('cartCount').textContent = cart.length;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cartTotal').textContent = formatVND(total);
+        }
+
+        function openCart() {
+            if (cart.length === 0) {
+                alert('Giỏ hàng đang trống! Vui lòng chọn món trà sữa trước.');
+                return;
+            }
+
+            const list = document.getElementById('cartItemsList');
+            let total = 0;
+            list.innerHTML = cart.map((item, idx) => {
+                total += item.price;
+                return `
+                    <div style="border-bottom: 1px solid var(--border); padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${item.product.name}</strong> (Size ${item.size})<br>
+                            <small style="color: var(--text-muted);">${item.sugar} đường, ${item.ice} &bull; ${item.toppings.join(', ') || 'Không topping'}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <strong>${formatVND(item.price)}</strong><br>
+                            <small style="color: #ef4444; cursor: pointer;" onclick="removeItem(${idx})">Xóa</small>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cartFinalTotal').textContent = formatVND(total);
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        function removeItem(idx) {
+            cart.splice(idx, 1);
+            updateCartHeader();
+            if (cart.length === 0) {
+                closeCart();
+            } else {
+                openCart();
+            }
+        }
+
+        function selectOrderType(type, btn) {
+            btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            orderType = type;
+        }
+
+        function selectPayMethod(method, btn) {
+            btn.parentElement.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            payMethod = method;
+
+            const qrBox = document.getElementById('qrBox');
+            if (method === 'vietqr') {
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                document.getElementById('vietQrImg').src = `https://img.vietqr.io/image/970422-0901234567-compact2.png?amount=${total}&addInfo=TRSUA`;
+                qrBox.style.display = 'block';
+            } else {
+                qrBox.style.display = 'none';
+            }
+        }
+
+        function submitOrder() {
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            const phone = document.getElementById('customerPhone').value || '0901234567';
+            alert(`🎉 ĐẶT HÀNG THÀNH CÔNG!\n- Tổng tiền: ${formatVND(total)}\n- Hình thức: ${orderType}\n- SĐT: ${phone}\nĐơn hàng đã được chuyển tới Order Service & Barista quầy pha chế!`);
+            cart = [];
+            updateCartHeader();
+            closeCart();
+        }
+
+        window.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>

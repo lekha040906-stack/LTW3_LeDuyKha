@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Trị Quán Trà Sữa - Admin Dashboard</title>
+    <style>
+        :root {
+            --primary: #9d5c34;
+            --primary-hover: #7b4421;
+            --primary-light: #fbf5f0;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-text: #92929f;
+            --sidebar-active: #ffffff;
+            --bg: #f5f8fa;
+            --card-bg: #ffffff;
+            --text-main: #181c32;
+            --text-muted: #7e8299;
+            --border: #eff2f5;
+            --success: #50cd89;
+            --warning: #ffc700;
+            --danger: #f1416c;
+            --info: #7239ea;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 18px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--sidebar-active);
+            border-left: 4px solid var(--primary);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* MAIN CONTENT */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 18px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .user-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* CARDS & TABLES */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 22px;
+            box-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.02);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .port-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #e1f0ff;
+            color: #0095e8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 14px;
+            background: #fafafa;
+            color: #5e6278;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            color: #3f4254;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #e8fff3; color: #50cd89; }
+        .badge-warning { background: #fff8dd; color: #ffc700; }
+        .badge-danger  { background: #fff5f8; color: #f1416c; }
+        .badge-info    { background: #f8f5ff; color: #7239ea; }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .service-stat-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-icon {
+            font-size: 32px;
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            🧋 MILK TEA ADMIN
+        </div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item active" onclick="switchTab('overview')">📊 Tổng quan hệ thống</li>
+            <li class="sidebar-item" onclick="switchTab('menu')">🍵 Menu Đồ uống (8081)</li>
+            <li class="sidebar-item" onclick="switchTab('orders')">📋 Quản lý Đơn hàng (8082)</li>
+            <li class="sidebar-item" onclick="switchTab('inventory')">📦 Kho nguyên liệu (8083)</li>
+            <li class="sidebar-item" onclick="switchTab('preparation')">🍹 Barista KDS (8084)</li>
+            <li class="sidebar-item" onclick="switchTab('payment')">💳 Thanh toán & QR (8085)</li>
+            <li class="sidebar-item" onclick="switchTab('customers')">👑 Khách hàng VIP (8086)</li>
+        </ul>
+        <div class="sidebar-footer">
+            <strong>Lê Duy Kha</strong> - 2124110074<br>
+            Lab 02: Spring Boot Microservices
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header>
+            <div class="header-title">
+                <h2>Hệ Thống Quản Trị Quán Trà Sữa</h2>
+                <p>Kiến trúc Microservices độc lập kết nối RESTful API</p>
+            </div>
+            <div class="user-badge">
+                Admin: Lê Duy Kha (MSSV: 2124110074)
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- TAB 1: TỔNG QUAN HỆ THỐNG -->
+            <div id="tab-overview" class="tab-panel active">
+                <div class="service-grid">
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Product Service</div>
+                            <strong style="font-size: 18px;">Port 8081</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">🧋</div>
+                    </div>
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Order Service</div>
+                            <strong style="font-size: 18px;">Port 8082</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">📋</div>
+                    </div>
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Inventory Service</div>
+                            <strong style="font-size: 18px;">Port 8083</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">📦</div>
+                    </div>
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Preparation Service</div>
+                            <strong style="font-size: 18px;">Port 8084</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">🍹</div>
+                    </div>
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Payment Service</div>
+                            <strong style="font-size: 18px;">Port 8085</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">💳</div>
+                    </div>
+                    <div class="service-stat-card">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Customer Service</div>
+                            <strong style="font-size: 18px;">Port 8086</strong>
+                            <div style="font-size: 12px; color: #50cd89;">● Đang hoạt động</div>
+                        </div>
+                        <div class="stat-icon">👑</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🚀 Hướng Dẫn Điều Khiển Hệ Thống</div>
+                        <button class="btn btn-primary" onclick="window.open('../client/index.html', '_blank')">
+                            Mở Trang Khách Hàng (Client) ➜
+                        </button>
+                    </div>
+                    <p style="font-size: 14px; line-height: 1.6; color: #5e6278;">
+                        Hệ thống bao gồm <strong>6 Microservices</strong> độc lập, mỗi service có tên, cổng và trách nhiệm riêng biệt:
+                        <br>1. Nhấp các mục bên thanh điều hướng bên trái để kiểm tra trực tiếp từng service.
+                        <br>2. Toàn bộ mã nguồn backend nằm trong thư mục <code>backend/</code>.
+                        <br>3. Chạy file <code>run-all.bat</code> ở thư mục gốc để khởi động đồng thời cả 6 microservices.
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB 2: MENU SERVICE -->
+            <div id="tab-menu" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            🍵 Danh Sách Đồ Uống Trà Sữa
+                            <span class="port-badge">GET http://localhost:8081/api/products</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchMenu()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Đồ Uống</th>
+                                <th>Danh Mục</th>
+                                <th>Đơn Giá</th>
+                                <th>Kích Cỡ</th>
+                                <th>Đánh Giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuTableBody">
+                            <tr><td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: ORDER SERVICE -->
+            <div id="tab-orders" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            📋 Quản Lý Đơn Hàng Trà Sữa
+                            <span class="port-badge">GET http://localhost:8082/api/orders</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchOrders()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mã Đơn</th>
+                                <th>Khách Hàng</th>
+                                <th>Hình Thức</th>
+                                <th>Chi Tiết Ly</th>
+                                <th>Tùy Chọn Đường/Đá/Topping</th>
+                                <th>Tổng Tiền</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: INVENTORY SERVICE -->
+            <div id="tab-inventory" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            📦 Kho Nguyên Vật Liệu Pha Chế
+                            <span class="port-badge">GET http://localhost:8083/api/inventory</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchInventory()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên Nguyên Liệu</th>
+                                <th>Đơn Vị</th>
+                                <th>Tồn Kho</th>
+                                <th>Ngưỡng Tối Thiểu</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                            <tr><td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 5: PREPARATION SERVICE (KDS) -->
+            <div id="tab-preparation" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            🍹 Màn Hình Barista Quầy Pha Chế (Kitchen Display - KDS)
+                            <span class="port-badge">GET http://localhost:8084/api/preparation/queue</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchPreparation()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thời Gian</th>
+                                <th>Mã Đơn / Vị Trí</th>
+                                <th>Món Nước & Size</th>
+                                <th>Đường & Đá</th>
+                                <th>Topping Kèm Theo</th>
+                                <th>Ghi Chú</th>
+                                <th>Tiến Độ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prepTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 6: PAYMENT SERVICE -->
+            <div id="tab-payment" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            💳 Giao Dịch Thanh Toán & VietQR
+                            <span class="port-badge">GET http://localhost:8085/api/payments</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchPayments()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Mã Đơn</th>
+                                <th>Số Tiền</th>
+                                <th>Phương Thức</th>
+                                <th>Mã Giao Dịch</th>
+                                <th>Thời Gian</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 7: CUSTOMER SERVICE -->
+            <div id="tab-customers" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            👑 Khách Hàng Thân Thiết & Tích Điểm
+                            <span class="port-badge">GET http://localhost:8086/api/customers</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="fetchCustomers()">↻ Làm Mới</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ Và Tên</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Hạng Hội Viên</th>
+                                <th>Điểm Thưởng</th>
+                                <th>Ưu Đãi Chiết Khấu</th>
+                                <th>Tổng Chi Tiêu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            <tr><td colspan="7" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatVND(amt) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amt);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            const eventItem = event.currentTarget;
+            if (eventItem) eventItem.classList.add('active');
+
+            if (tabId === 'menu') fetchMenu();
+            if (tabId === 'orders') fetchOrders();
+            if (tabId === 'inventory') fetchInventory();
+            if (tabId === 'preparation') fetchPreparation();
+            if (tabId === 'payment') fetchPayments();
+            if (tabId === 'customers') fetchCustomers();
+        }
+
+        async function fetchMenu() {
+            const tbody = document.getElementById('menuTableBody');
+            try {
+                const res = await fetch('http://localhost:8081/api/products');
+                const data = await res.json();
+                tbody.innerHTML = data.map(p => `
+                    <tr>
+                        <td>#${p.id}</td>
+                        <td><strong>${p.image || '🧋'} ${p.name}</strong></td>
+                        <td>${p.category}</td>
+                        <td><strong>${formatVND(p.price)}</strong></td>
+                        <td>Size ${p.size || 'M'}</td>
+                        <td>⭐ ${p.rating || 5.0}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color: #f1416c;">⚠️ Chưa kết nối được Product Service (Port 8081). Vui lòng chạy service!</td></tr>`;
+            }
+        }
+
+        async function fetchOrders() {
+            const tbody = document.getElementById('orderTableBody');
+            try {
+                const res = await fetch('http://localhost:8082/api/orders');
+                const data = await res.json();
+                tbody.innerHTML = data.map(o => `
+                    <tr>
+                        <td><strong>${o.orderCode}</strong></td>
+                        <td>${o.customerName}</td>
+                        <td><span class="badge-status badge-info">${o.orderType}</span></td>
+                        <td>${o.quantity}x ${o.productName} (Size ${o.size})</td>
+                        <td>${o.sugar} đường, ${o.ice} đá ${(o.toppings||[]).join(', ')}</td>
+                        <td><strong>${formatVND(o.totalPrice)}</strong></td>
+                        <td><span class="badge-status badge-success">${o.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: #f1416c;">⚠️ Chưa kết nối được Order Service (Port 8082).</td></tr>`;
+            }
+        }
+
+        async function fetchInventory() {
+            const tbody = document.getElementById('inventoryTableBody');
+            try {
+                const res = await fetch('http://localhost:8083/api/inventory');
+                const data = await res.json();
+                tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>#${i.id}</td>
+                        <td><strong>${i.name}</strong></td>
+                        <td>${i.unit}</td>
+                        <td>${i.stock}</td>
+                        <td>${i.minThreshold}</td>
+                        <td><span class="badge-status ${i.status.includes('SẮP HẾT') ? 'badge-warning' : 'badge-success'}">${i.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color: #f1416c;">⚠️ Chưa kết nối được Inventory Service (Port 8083).</td></tr>`;
+            }
+        }
+
+        async function fetchPreparation() {
+            const tbody = document.getElementById('prepTableBody');
+            try {
+                const res = await fetch('http://localhost:8084/api/preparation/queue');
+                const data = await res.json();
+                tbody.innerHTML = data.map(q => `
+                    <tr>
+                        <td>${q.createdAt}</td>
+                        <td><strong>${q.orderCode}</strong><br><small>${q.tableOrArea}</small></td>
+                        <td><strong>${q.quantity}x ${q.drinkName}</strong> (Size ${q.size})</td>
+                        <td>${q.sugar} đường, ${q.ice} đá</td>
+                        <td>${(q.toppings||[]).join(', ')}</td>
+                        <td style="color: #f1416c;">${q.note || '-'}</td>
+                        <td><span class="badge-status badge-warning">${q.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: #f1416c;">⚠️ Chưa kết nối được Preparation Service (Port 8084).</td></tr>`;
+            }
+        }
+
+        async function fetchPayments() {
+            const tbody = document.getElementById('paymentTableBody');
+            try {
+                const res = await fetch('http://localhost:8085/api/payments');
+                const data = await res.json();
+                tbody.innerHTML = data.map(p => `
+                    <tr>
+                        <td>#${p.id}</td>
+                        <td><strong>${p.orderCode}</strong></td>
+                        <td><strong>${formatVND(p.amount)}</strong></td>
+                        <td>${p.paymentMethod}</td>
+                        <td><code>${p.transactionRef}</code></td>
+                        <td>${p.paidAt}</td>
+                        <td><span class="badge-status badge-success">${p.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: #f1416c;">⚠️ Chưa kết nối được Payment Service (Port 8085).</td></tr>`;
+            }
+        }
+
+        async function fetchCustomers() {
+            const tbody = document.getElementById('customerTableBody');
+            try {
+                const res = await fetch('http://localhost:8086/api/customers');
+                const data = await res.json();
+                tbody.innerHTML = data.map(c => `
+                    <tr>
+                        <td>#${c.id}</td>
+                        <td><strong>${c.name}</strong></td>
+                        <td>${c.phone}</td>
+                        <td><span class="badge-status badge-info">${c.tier}</span></td>
+                        <td><strong>${c.points}</strong> pts</td>
+                        <td>Giảm ${c.discountPercent}%</td>
+                        <td>${formatVND(c.totalSpent)}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="7" style="color: #f1416c;">⚠️ Chưa kết nối được Customer Service (Port 8086).</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>
