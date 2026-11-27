@@ -47,23 +47,27 @@ public class ProductService {
     }
 
     public Product createFromDto(ProductRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + request.getCategoryId()));
+        Long catId = request.categoryId() != null ? request.categoryId() : 1L;
+        Category category = categoryRepository.findById(catId)
+            .orElseGet(() -> categoryRepository.findAll().stream().findFirst().orElse(null));
+
         Brand brand = null;
-        if (request.getBrandId() != null) {
-            brand = brandRepository.findById(request.getBrandId()).orElse(null);
+        if (request.brandId() != null) {
+            brand = brandRepository.findById(request.brandId()).orElse(null);
+        } else {
+            brand = brandRepository.findAll().stream().findFirst().orElse(null);
         }
 
         Product product = new Product(
-            request.getName().trim(),
-            request.getPrice(),
-            request.getQuantity(),
-            request.getDescription(),
+            request.name().trim(),
+            request.price(),
+            request.quantity() != null ? request.quantity() : 100,
+            request.description() != null ? request.description() : "",
             category,
             brand
         );
-        if (request.getSize() != null) {
-            product.setSize(request.getSize());
+        if (request.size() != null) {
+            product.setSize(request.size());
         }
         return repository.save(product);
     }
@@ -129,25 +133,19 @@ public class ProductService {
     }
 
     public ProductResponse toResponseDto(Product product) {
-        ProductResponse dto = new ProductResponse();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setPrice(product.getPrice());
-        dto.setQuantity(product.getQuantity());
-        dto.setDescription(product.getDescription());
-        dto.setSize(product.getSize());
-        dto.setRating(product.getRating());
-        dto.setIsAvailable(product.getIsAvailable());
-        if (product.getCategory() != null) {
-            dto.setCategoryId(product.getCategory().getId());
-            dto.setCategoryName(product.getCategory().getName());
-            dto.setIcon(product.getCategory().getIcon());
-        }
-        if (product.getBrand() != null) {
-            dto.setBrandId(product.getBrand().getId());
-            dto.setBrandName(product.getBrand().getName());
-        }
-        return dto;
+        return new ProductResponse(
+            product.getId(),
+            product.getName(),
+            product.getPrice(),
+            product.getQuantity(),
+            product.getDescription(),
+            product.getSize(),
+            product.getRating(),
+            product.getIsAvailable(),
+            product.getCategory() != null ? product.getCategory().getId() : null,
+            product.getCategory() != null ? product.getCategory().getName() : null,
+            product.getCategory() != null ? product.getCategory().getIcon() : "🧋"
+        );
     }
 
     public List<ProductResponse> getAllResponses() {
