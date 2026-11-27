@@ -1,8 +1,7 @@
 package com.example.orderservice.controller;
 
-import com.example.orderservice.dto.request.CreateOrderRequest;
-import com.example.orderservice.dto.response.ApiResponse;
-import com.example.orderservice.dto.response.OrderResponse;
+import com.example.orderservice.dto.OrderRequest;
+import com.example.orderservice.dto.OrderResponse;
 import com.example.orderservice.entity.Order;
 import com.example.orderservice.service.OrderService;
 import jakarta.validation.Valid;
@@ -45,15 +44,10 @@ public class OrderController {
         return ResponseEntity.ok(service.toResponseDto(service.getByOrderCode(orderCode)));
     }
 
-    /**
-     * API Nghiệp vụ gọi món liên service (Lab 03) với Request DTO và Response DTO chuẩn hóa
-     */
     @PostMapping("/place-order")
-    public ResponseEntity<ApiResponse<OrderResponse>> placeOrder(@Valid @RequestBody CreateOrderRequest request) {
+    public ResponseEntity<OrderResponse> placeOrder(@Valid @RequestBody OrderRequest request) {
         OrderResponse response = service.placeOrder(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            ApiResponse.ok("Khách hàng đã gọi món thành công! Đơn hàng đã được tạo.", response)
-        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping

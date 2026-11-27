@@ -1,8 +1,7 @@
 package com.example.productservice.controller;
 
-import com.example.productservice.dto.request.ProductCreateRequest;
-import com.example.productservice.dto.response.ApiResponse;
-import com.example.productservice.dto.response.ProductResponse;
+import com.example.productservice.dto.ProductRequest;
+import com.example.productservice.dto.ProductResponse;
 import com.example.productservice.entity.Product;
 import com.example.productservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -35,27 +34,21 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ProductResponse>> create(@Valid @RequestBody ProductCreateRequest request) {
+    public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         Product created = service.createFromDto(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            ApiResponse.ok("Tạo đồ uống thành công", service.toResponseDto(created))
-        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.toResponseDto(created));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> update(@PathVariable Long id, @Valid @RequestBody Product product) {
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody Product product) {
         Product updated = service.update(id, product);
-        return ResponseEntity.ok(
-            ApiResponse.ok("Cập nhật đồ uống thành công", service.toResponseDto(updated))
-        );
+        return ResponseEntity.ok(service.toResponseDto(updated));
     }
 
     @PutMapping("/{id}/reduce-stock")
-    public ResponseEntity<ApiResponse<ProductResponse>> reduceStock(@PathVariable Long id, @RequestParam Integer quantity) {
+    public ResponseEntity<ProductResponse> reduceStock(@PathVariable Long id, @RequestParam Integer quantity) {
         Product updated = service.reduceStock(id, quantity);
-        return ResponseEntity.ok(
-            ApiResponse.ok("Giảm tồn kho thành công", service.toResponseDto(updated))
-        );
+        return ResponseEntity.ok(service.toResponseDto(updated));
     }
 
     @DeleteMapping("/{id}")

@@ -1,14 +1,15 @@
 package com.example.orderservice.service;
 
-import com.example.orderservice.dto.request.CreateOrderRequest;
-import com.example.orderservice.dto.request.OrderItemRequest;
-import com.example.orderservice.dto.response.OrderItemResponse;
-import com.example.orderservice.dto.response.OrderResponse;
-import com.example.orderservice.dto.response.ProductDto;
+import com.example.orderservice.dto.OrderItemRequest;
+import com.example.orderservice.dto.OrderItemResponse;
+import com.example.orderservice.dto.OrderRequest;
+import com.example.orderservice.dto.OrderResponse;
+import com.example.orderservice.dto.ProductDto;
 import com.example.orderservice.entity.Order;
 import com.example.orderservice.entity.OrderItem;
 import com.example.orderservice.exception.ProductNotFoundException;
 import com.example.orderservice.exception.ProductUnavailableException;
+import com.example.orderservice.exception.ResourceNotFoundException;
 import com.example.orderservice.exception.ServiceUnavailableException;
 import com.example.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
@@ -40,12 +41,12 @@ public class OrderService {
 
     public Order getById(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng có ID: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng có ID: " + id));
     }
 
     public Order getByOrderCode(String orderCode) {
         return repository.findByOrderCode(orderCode)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng có mã: " + orderCode));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng có mã: " + orderCode));
     }
 
     public Order create(Order order) {
@@ -60,15 +61,7 @@ public class OrderService {
         return repository.save(order);
     }
 
-    /**
-     * Quy trình gọi món / đặt hàng liên Microservices (Lab 03):
-     * 1. Gọi Product Service để kiểm tra sản phẩm và lấy đơn giá chính xác.
-     * 2. Kiểm tra tình trạng còn món và tồn kho.
-     * 3. Tính toán tiền món (kèm phụ thu size L) và tổng tiền đơn hàng.
-     * 4. Gọi Product Service để trừ số lượng tồn kho.
-     * 5. Lưu đơn hàng vào SQL Server và trả về OrderResponse DTO.
-     */
-    public OrderResponse placeOrder(CreateOrderRequest request) {
+    public OrderResponse placeOrder(OrderRequest request) {
         Order order = new Order();
         order.setOrderCode("ORDER-" + System.currentTimeMillis());
         order.setCustomerName(request.getCustomerName().trim());
@@ -83,10 +76,8 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (OrderItemRequest itemReq : request.getItems()) {
-            // 1. Gọi Product Service kiểm tra sản phẩm
             ProductDto product = fetchProductFromProductService(itemReq.getProductId());
 
-            // 2. Kiểm tra tình trạng món
             if (product.getIsAvailable() != null && !product.getIsAvailable()) {
                 throw new ProductUnavailableException("Món '" + product.getName() + "' hiện đang tạm ngưng phục vụ.");
             }
@@ -94,7 +85,6 @@ public class OrderService {
                 throw new ProductUnavailableException("Món '" + product.getName() + "' không đủ số lượng (còn: " + product.getQuantity() + ", yêu cầu: " + itemReq.getQuantity() + ")");
             }
 
-            // 3. Tính đơn giá và thành tiền
             BigDecimal unitPrice = product.getPrice();
             BigDecimal sizeExtra = "L".equalsIgnoreCase(itemReq.getSize()) ? BigDecimal.valueOf(5000) : BigDecimal.ZERO;
             BigDecimal finalItemPrice = unitPrice.add(sizeExtra);
@@ -102,7 +92,6 @@ public class OrderService {
 
             totalAmount = totalAmount.add(subtotal);
 
-            // 4. Tạo OrderItem
             OrderItem orderItem = new OrderItem(
                 product.getId(),
                 product.getName(),
@@ -118,7 +107,6 @@ public class OrderService {
             orderItem.setOrder(order);
             orderItems.add(orderItem);
 
-            // 5. Cập nhật tồn kho bên Product Service
             reduceStockOnProductService(product.getId(), itemReq.getQuantity());
         }
 
@@ -149,7 +137,6 @@ public class OrderService {
                 .retrieve()
                 .toBodilessEntity();
         } catch (Exception e) {
-            // Log và tiếp tục nếu Product Service ghi nhận sau
             System.err.println("Cảnh báo: Không thể giảm tồn kho sản phẩm " + productId + ": " + e.getMessage());
         }
     }

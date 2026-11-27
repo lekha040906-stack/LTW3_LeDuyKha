@@ -1,4 +1,4 @@
-package com.example.productservice.dto.request;
+package com.example.productservice.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
-public class ProductCreateRequest {
+public class ProductRequest {
 
     @NotBlank(message = "Tên đồ uống không được để trống")
     private String name;
@@ -27,7 +27,17 @@ public class ProductCreateRequest {
 
     private Long brandId;
 
-    public ProductCreateRequest() {}
+    public ProductRequest() {}
+
+    public ProductRequest(String name, BigDecimal price, Integer quantity, String description, String size, Long categoryId, Long brandId) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.description = description;
+        this.size = size;
+        this.categoryId = categoryId;
+        this.brandId = brandId;
+    }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

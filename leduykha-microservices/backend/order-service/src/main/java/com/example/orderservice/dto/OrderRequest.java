@@ -1,4 +1,4 @@
-package com.example.orderservice.dto.request;
+package com.example.orderservice.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
-public class CreateOrderRequest {
+public class OrderRequest {
 
     @NotBlank(message = "Tên khách hàng không được để trống")
     private String customerName;
@@ -25,7 +25,7 @@ public class CreateOrderRequest {
     @Valid
     private List<OrderItemRequest> items;
 
-    public CreateOrderRequest() {}
+    public OrderRequest() {}
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }

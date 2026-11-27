@@ -1,10 +1,11 @@
 package com.example.productservice.service;
 
-import com.example.productservice.dto.request.ProductCreateRequest;
-import com.example.productservice.dto.response.ProductResponse;
+import com.example.productservice.dto.ProductRequest;
+import com.example.productservice.dto.ProductResponse;
 import com.example.productservice.entity.Brand;
 import com.example.productservice.entity.Category;
 import com.example.productservice.entity.Product;
+import com.example.productservice.exception.ResourceNotFoundException;
 import com.example.productservice.repository.BrandRepository;
 import com.example.productservice.repository.CategoryRepository;
 import com.example.productservice.repository.ProductRepository;
@@ -32,7 +33,7 @@ public class ProductService {
 
     public Product getById(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có ID: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm có ID: " + id));
     }
 
     public Product create(Product product) {
@@ -45,9 +46,9 @@ public class ProductService {
         return repository.save(product);
     }
 
-    public Product createFromDto(ProductCreateRequest request) {
+    public Product createFromDto(ProductRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục với ID: " + request.getCategoryId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + request.getCategoryId()));
         Brand brand = null;
         if (request.getBrandId() != null) {
             brand = brandRepository.findById(request.getBrandId()).orElse(null);
